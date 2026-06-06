@@ -1,0 +1,15 @@
+Steps To Measure Performance 
+
+Step 1:  Clear cache 
+sudo sync echo 3 | sudo tee /proc/sys/vm/drop_caches 
+
+Step 2: Now record the current values of the three metrics 
+grep -E "pgmajfault|pgpgin|pgpgout" /proc/vmstat 
+
+Step 3: Run Workload 
+stress-ng --vm 2 --vm-bytes 80% --timeout 60s --metrics-brief 
+sysbench --test=memory run 
+
+Step 4: Record the counters again: 
+grep -E "pgmajfault|pgpgin|pgpgout" /proc/vmstat 
+Repeat step 1-4 N times and log counters for both ML and Generic kernel 

@@ -1,0 +1,52 @@
+Steps To Build ML based cache replacement Kernel 
+
+Step 1: Install Packages required to build kernel 
+> sudo apt update 
+> sudo apt install build-essential libncurses-dev bison flex libssl
+dev libelf-dev git 
+
+Step 2: Download Linux Kernel Source code 
+> mkdir ~/kernel-ml 
+> cd ~/kernel-ml 
+> git clone https://github.com/torvalds/linux.git 
+
+Step 3: Open linux/mm folder and save ml_predict.h file (Main ML Logic) 
+> cd linux/mm 
+> nano ml_predict.h 
+
+Step 4: Make changes in mm/vmscan.c file (Calling ML model) 
+> gedit vmscan.c 
+> add #include “ml_predict.h”  
+> Inside vmscan.c find function reclaim_clean_pages_from_list() and
+make changes given below in loop list_for_each_entry_safe()\ 
+
+Step 5: Prepare Modules 
+ > make modules_prepare 
+ 
+Step 6: Disable the missing certification requirements  
+ (Necessary for custom kernels) 
+ > scripts/config --disable SYSTEM_TRUSTED_KEYS 
+ > scripts/config --disable SYSTEM_REVOCATION_KEYS 
+ > scripts/config --disable SYSTEM_TRUSTED_KEYRING 
+ > scripts/config --disable MODULE_SIG 
+ > scripts/config --disable MODULE_SIG_ALL 
+ > scripts/config --set-str MODULE_SIG_KEY "" 
+ 
+Step 7: Refresh the configurations 
+ > make olddefconfig 
+ 
+ 
+Step 7.5 (Optional): Perform this step if system storage is limited(<30GB) 
+ > yes ””| make localmodconfig 
+ [This step will let you build a basic kernel(core+mm only) and
+ removes unused subsystem (like GPU, wireless, ARM, etc.)] 
+ 
+Step 8: Rebild Kernel Image (This step could take from 20 to 40 min) 
+ > make -j2 bzImage 
+ 
+Step 9: Boot compiled kernel 
+ > make -j2 modules 
+ > sudo make modules_install 
+ > sudo make install 
+ > sudo update-grub 
+ > sudo reboot 

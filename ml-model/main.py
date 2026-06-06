@@ -5,8 +5,12 @@ from sklearn.model_selection import StratifiedKFold, cross_val_predict
 from imblearn.pipeline import Pipeline
 from imblearn.over_sampling import SMOTE
 import joblib
+import os
 
-df = pd.read_csv(r"C:\Users\shali\Desktop\ML Cache Replacement\ML Based Cache ReplaceMent\newdataset.csv")
+current_dir = os.path.dirname(os.path.abspath(__file__))
+dataset_path = os.path.join(current_dir, "..", "dataset", "dataset.csv")
+
+df = pd.read_csv(dataset_path)
 
 df.columns = df.columns.str.strip().str.lower().str.replace(' ', '_')
 X = df[['reference_bit', 'dirty_bit', 'age', 'access_count']]
@@ -34,6 +38,10 @@ print(cm)
 print("\nClassification Report:")
 print(report)
 
-joblib.dump(pipeline, "decision_tree_model.pkl")
+pipeline.fit(X, y)
+
+classifier = pipeline.named_steps['classifier']
+
+joblib.dump(classifier, "decision_tree_model.pkl")
 
 print("Model saved as decision_tree_model.pkl")
